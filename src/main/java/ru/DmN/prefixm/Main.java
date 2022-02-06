@@ -16,7 +16,6 @@ import java.util.UUID;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-
 public class Main implements ModInitializer {
     public static Map<UUID, String> prefixes = new HashMap<>();
 
@@ -24,12 +23,7 @@ public class Main implements ModInitializer {
     public void onInitialize() {
         ServerWorldEvents.LOAD.register((server, world) -> {
             load();
-            var dispatcher = server.getCommandManager().getDispatcher();
-            dispatcher.register(literal("test").executes(context -> {
-                context.getSource().getPlayer().sendMessage(new LiteralText("Hello!"), false);
-                return 1;
-            }));
-            dispatcher.register(literal("DmNServer").then(literal("sprefix")
+            server.getCommandManager().getDispatcher().register(literal("DmNServer").then(literal("sprefix")
                     .then(literal("user").then(argument("player", EntityArgumentType.player()).then(argument("prefix", StringArgumentType.greedyString()).executes(context -> {
                         prefixes.put(context.getArgument("player", EntitySelector.class).getPlayer(context.getSource()).getUuid(), context.getArgument("prefix", String.class).replace('#', '§'));
                         save();
