@@ -2,11 +2,9 @@ package ru.DmN.prefixm;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.Util;
 
 import java.io.*;
 import java.util.HashMap;
@@ -21,20 +19,14 @@ public class Main implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        ServerWorldEvents.LOAD.register((server, world) -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             load();
-            server.getCommandManager().getDispatcher().register(literal("DmNServer").then(literal("sprefix")
-                    .then(literal("user").then(argument("player", EntityArgumentType.player()).then(argument("prefix", StringArgumentType.greedyString()).executes(context -> {
+            dispatcher.register(literal("prefix")
+                    .then(argument("player", EntityArgumentType.player()).then(argument("prefix", StringArgumentType.greedyString()).executes(context -> {
                         prefixes.put(context.getArgument("player", EntitySelector.class).getPlayer(context.getSource()).getUuid(), context.getArgument("prefix", String.class).replace('#', '§'));
                         save();
                         return 1;
-                    }))))
-                    .then(literal("console").then(argument("prefix", StringArgumentType.greedyString()).executes(context -> {
-                        prefixes.put(Util.NIL_UUID, context.getArgument("prefix", String.class).replace('#', '§'));
-                        save();
-                        return 1;
-                    })))
-            ));
+                    }))));
         });
     }
 
